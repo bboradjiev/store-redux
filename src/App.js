@@ -2,11 +2,13 @@ import React, {useState} from 'react';
 import data from './data.json';
 import Products from '../src/components/Products';
 import Filter from './components/Filter';
+import Cart from '../src/components/Cart'
 
 function App() {
 
   const [state, setState] = useState({
                           products: data.products,
+                          cartItems: [],
                           size: '',
                           sort: '',
   });
@@ -23,9 +25,29 @@ function App() {
     };
   };
 
+  const removeFromCart = (id) => {
+    const tempCart = state.cartItems.filter(item => item._id !== id)
+    return setState({...state, cartItems: tempCart})
+  }
+
+  const addToCart = (product) =>{
+    const cartItems = state.cartItems.slice();
+    let alreadyInCart = false;
+    cartItems.map(item => {
+      if(item._id === product._id){
+        item.count ++;
+        console.log(item.count)
+        alreadyInCart = true;
+      }
+    });
+    if(!alreadyInCart){
+      cartItems.push({...product, count: 1});
+    };
+    setState({...state, cartItems: cartItems})
+  };
+
   const sortProducts = (event) => {
-    console.log(data.products)
-    if(event.target.value === 'Latest'){
+     if(event.target.value === 'Latest'){
       setState({...state,
         products: data.products.sort((a,b)=>{
       return a._id - b._id;
@@ -44,6 +66,14 @@ function App() {
     };    
   };
 
+  const calculateTotal = () => {
+    let total = 0;
+    state.cartItems.map( item =>
+    total += item.price * item.count)
+
+      return total;
+  };
+
   return (
     <div className='grid-container'>
         <header>
@@ -57,10 +87,13 @@ function App() {
                         sort={state.sort}
                         filterProducts={filterProducts}
                         sortProducts={sortProducts} />
-                  <Products products={state.products}/>
+                  <Products products={state.products}
+                            addToCart={addToCart}/>
               </div>
               <div className='sidebar'>
-                  CartItems
+                <Cart cartItems={state.cartItems}
+                      removeFromCart={removeFromCart}
+                      calculateTotal={calculateTotal}/>
               </div>
           </div>
         </main>
