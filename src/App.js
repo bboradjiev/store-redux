@@ -8,7 +8,7 @@ function App() {
 
   const [state, setState] = useState({
                           products: data.products,
-                          cartItems: [],
+                          cartItems: JSON.parse(localStorage.getItem('cartItems')) ? JSON.parse(localStorage.getItem('cartItems')) : [],
                           size: '',
                           sort: '',
   });
@@ -25,15 +25,21 @@ function App() {
     };
   };
 
+  const createOrder = (order) => {
+    console.log('hi') 
+ }
+
   const removeFromCart = (id) => {
     const tempCart = state.cartItems.filter(item => item._id !== id)
-    return setState({...state, cartItems: tempCart})
-  }
+    
+    setState({...state, cartItems: tempCart});
+    localStorage.setItem('cartItems', JSON.stringify(state.cartItems.filter(item => item._id !== id)));
+    }
 
   const addToCart = (product) =>{
-    const cartItems = state.cartItems.slice();
+    const tempCart = state.cartItems.slice();
     let alreadyInCart = false;
-    cartItems.map(item => {
+    tempCart.map(item => {
       if(item._id === product._id){
         item.count ++;
         console.log(item.count)
@@ -41,9 +47,10 @@ function App() {
       }
     });
     if(!alreadyInCart){
-      cartItems.push({...product, count: 1});
+      tempCart.push({...product, count: 1});
     };
-    setState({...state, cartItems: cartItems})
+    setState({...state, cartItems: tempCart});
+    localStorage.setItem('cartItems', JSON.stringify(state.cartItems));
   };
 
   const sortProducts = (event) => {
@@ -93,7 +100,8 @@ function App() {
               <div className='sidebar'>
                 <Cart cartItems={state.cartItems}
                       removeFromCart={removeFromCart}
-                      calculateTotal={calculateTotal}/>
+                      calculateTotal={calculateTotal}
+                      createOrder={createOrder}/>
               </div>
           </div>
         </main>
